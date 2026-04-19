@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  epay:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: epay
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: "${DB_HOST}"
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_USER: "${DB_USER}"
+      DB_PASS: "${DB_PASS}"
+      DB_NAME: "${DB_NAME}"
+      DB_PREFIX: "${DB_PREFIX:-pay}"
+      # 可选：站点根URL（不填则按 Host 自动推断）
+      # SITE_URL: "${SITE_URL}"
+    volumes:
+      # 需要保留上传/运行时文件时再启用（按需）
+      # - ./install/install.lock:/var/www/html/install/install.lock
+      # - ./cache:/var/www/html/includes/cache
+      # - ./logs:/var/www/html/logs
+    restart: unless-stopped

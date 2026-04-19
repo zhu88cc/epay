@@ -73,7 +73,7 @@ case 'login':
 		$expiretime=time()+604800;
 		$token=authcode("{$uid}\t{$session}\t{$expiretime}", 'ENCODE', SYS_KEY);
 		ob_clean();
-		setcookie("user_token", $token, time() + 2592000);
+		setCookieSafe("user_token", $token, time() + 2592000);
 		$DB->exec("update `pre_user` set `lasttime`=NOW() where `uid`='$uid'");
 		if(empty($userrow['account']) || empty($userrow['username'])){
 			$result=array("code"=>0,"msg"=>"登录成功！正在跳转到收款账号设置","url"=>"./editinfo.php?start=1");

@@ -21,7 +21,11 @@ $link = '';
 $sql = " 1";
 if(isset($_GET['value']) && !empty($_GET['value'])) {
 	$value=daddslashes($_GET['value']);
-	$sql .= " AND A.`{$_GET['column']}`='{$value}'";
+	$column = isset($_GET['column']) ? trim($_GET['column']) : '';
+	$columnMap = ['channel'=>'channel', 'uid'=>'uid', 'account'=>'account', 'name'=>'name'];
+	if(isset($columnMap[$column])){
+		$sql .= " AND A.`{$columnMap[$column]}`='{$value}'";
+	}
 	$link .= '&column='.$_GET['column'].'&value='.urlencode($_GET['value']);
 }
 ?>

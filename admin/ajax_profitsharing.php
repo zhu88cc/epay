@@ -19,13 +19,26 @@ case 'orderList':
 		$dstatus = intval($_POST['dstatus']);
 		$sql.=" AND `status`={$dstatus}";
 	}
-	if(isset($_POST['value']) && !empty($_POST['value'])) {
-		$sql.=" AND `{$_POST['column']}`='{$_POST['value']}'";
+	$params = [];
+	if(isset($_POST['value']) && $_POST['value']!=='') {
+		$columnMap = [
+			'rid' => 'rid',
+			'trade_no' => 'trade_no',
+			'uid' => 'uid',
+			'account' => 'account',
+		];
+		$column = isset($_POST['column']) ? trim($_POST['column']) : '';
+		$value = trim((string)$_POST['value']);
+		if(!isset($columnMap[$column])){
+			exit(json_encode(['total'=>0, 'rows'=>[], 'msg'=>'invalid column']));
+		}
+		$sql .= " AND `{$columnMap[$column]}` = :kw";
+		$params[':kw'] = $value;
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_psorder WHERE{$sql}");
-	$list = $DB->getAll("SELECT * FROM pre_psorder WHERE{$sql} order by id desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_psorder WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT * FROM pre_psorder WHERE{$sql} order by id desc limit $offset,$limit", $params);
 
 	exit(json_encode(['total'=>$total, 'rows'=>$list]));
 break;

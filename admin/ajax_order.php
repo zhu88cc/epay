@@ -47,17 +47,37 @@ case 'orderList':
 			$sql.=" AND A.addtime<='{$endtime} 23:59:59'";
 		}
 	}
-	if(isset($_POST['value']) && !empty($_POST['value'])) {
-		if($_POST['column']=='name'){
-			$sql.=" AND A.`{$_POST['column']}` like '%{$_POST['value']}%'";
+	$params = [];
+	if(isset($_POST['value']) && $_POST['value']!=='') {
+		$columnMap = [
+			'trade_no' => 'A.trade_no',
+			'out_trade_no' => 'A.out_trade_no',
+			'api_trade_no' => 'A.api_trade_no',
+			'name' => 'A.name',
+			'money' => 'A.money',
+			'realmoney' => 'A.realmoney',
+			'getmoney' => 'A.getmoney',
+			'domain' => 'A.domain',
+			'buyer' => 'A.buyer',
+			'ip' => 'A.ip',
+		];
+		$column = isset($_POST['column']) ? trim($_POST['column']) : '';
+		$value = trim((string)$_POST['value']);
+		if(!isset($columnMap[$column])){
+			exit(json_encode(['total'=>0, 'rows'=>[], 'msg'=>'invalid column']));
+		}
+		if($column === 'name'){
+			$sql .= " AND {$columnMap[$column]} LIKE :kw";
+			$params[':kw'] = '%'.$value.'%';
 		}else{
-			$sql.=" AND A.`{$_POST['column']}`='{$_POST['value']}'";
+			$sql .= " AND {$columnMap[$column]} = :kw";
+			$params[':kw'] = $value;
 		}
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_order A WHERE{$sql}");
-	$list = $DB->getAll("SELECT A.*,B.plugin FROM pre_order A LEFT JOIN pre_channel B ON A.channel=B.id WHERE{$sql} order by trade_no desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_order A WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT A.*,B.plugin FROM pre_order A LEFT JOIN pre_channel B ON A.channel=B.id WHERE{$sql} order by trade_no desc limit $offset,$limit", $params);
 	$list2 = [];
 	foreach($list as $row){
 		$row['typename'] = $paytypes[$row['type']];
@@ -70,8 +90,22 @@ break;
 
 case 'riskList':
 	$sql=" 1=1";
-	if(isset($_POST['value']) && !empty($_POST['value'])) {
-		$sql.=" AND `{$_POST['column']}`='{$_POST['value']}'";
+	$params = [];
+	if(isset($_POST['value']) && $_POST['value']!=='') {
+		$columnMap = [
+			'uid' => 'uid',
+			'type' => 'type',
+			'url' => 'url',
+			'content' => 'content',
+			'date' => 'date',
+		];
+		$column = isset($_POST['column']) ? trim($_POST['column']) : '';
+		$value = trim((string)$_POST['value']);
+		if(!isset($columnMap[$column])){
+			exit(json_encode(['total'=>0, 'rows'=>[], 'msg'=>'invalid column']));
+		}
+		$sql .= " AND `{$columnMap[$column]}` = :kw";
+		$params[':kw'] = $value;
 	}
 	if(isset($_POST['type']) && $_POST['type']>-1) {
 		$type = intval($_POST['type']);
@@ -79,8 +113,8 @@ case 'riskList':
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_risk WHERE{$sql}");
-	$list = $DB->getAll("SELECT * FROM pre_risk WHERE{$sql} order by id desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_risk WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT * FROM pre_risk WHERE{$sql} order by id desc limit $offset,$limit", $params);
 
 	exit(json_encode(['total'=>$total, 'rows'=>$list]));
 break;

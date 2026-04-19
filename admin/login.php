@@ -31,7 +31,7 @@ if(isset($_GET['act']) && $_GET['act']=='login'){
 		$session=md5($username.$password.$password_hash);
 		$expiretime=time() + 2592000;
 		$token=authcode("{$username}\t{$session}\t{$expiretime}", 'ENCODE', SYS_KEY);
-		setcookie("admin_token", $token, $expiretime, null, null, null, true);
+		setCookieSafe("admin_token", $token, $expiretime, '/', '', null, true);
     unset($_SESSION['vc_code']);
     exit(json_encode(['code'=>0]));
   }else{
@@ -52,7 +52,7 @@ if(isset($_GET['act']) && $_GET['act']=='login'){
   }
 }elseif(isset($_GET['logout'])){
 	if(!checkRefererHost())exit();
-	setcookie("admin_token", "", time() - 2592000);
+	setCookieSafe("admin_token", "", time() - 2592000);
 	exit("<script language='javascript'>window.location.href='./login.php';</script>");
 }elseif($islogin==1){
 	exit("<script language='javascript'>alert('您已登录！');window.location.href='./';</script>");

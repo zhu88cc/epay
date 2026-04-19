@@ -761,6 +761,28 @@ function checkRefererHost(){
 	if(strpos($http_host,':'))$http_host = substr($http_host, 0, strpos($http_host, ':'));
 	return $url_arr['host'] === $http_host;
 }
+
+/**
+ * Safe cookie setter (adds HttpOnly/Secure/SameSite by default).
+ *
+ * Notes:
+ * - `Secure` is enabled automatically when HTTPS is detected.
+ * - Default SameSite is Lax to reduce CSRF risk while staying compatible.
+ */
+function setCookieSafe($name, $value, $expire = 0, $path = '/', $domain = '', $secure = null, $httponly = true, $samesite = 'Lax'){
+	if($secure === null){
+		$secure = is_https();
+	}
+	$options = [
+		'expires' => $expire,
+		'path' => $path,
+		'domain' => $domain,
+		'secure' => $secure,
+		'httponly' => $httponly,
+		'samesite' => $samesite,
+	];
+	return setcookie($name, $value, $options);
+}
 function randFloat($min=0, $max=1){
 	return $min + mt_rand()/mt_getrandmax() * ($max-$min);
 }

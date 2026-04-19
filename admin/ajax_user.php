@@ -29,13 +29,31 @@ case 'userList':
 		$upid = intval($_POST['upid']);
 		$sql.=" AND `upid`='$upid'";
 	}
-	if(isset($_POST['value']) && !empty($_POST['value'])) {
-		$sql.=" AND `{$_POST['column']}`='{$_POST['value']}'";
+	$params = [];
+	if(isset($_POST['value']) && $_POST['value']!=='') {
+		$columnMap = [
+			'uid' => 'uid',
+			'email' => 'email',
+			'phone' => 'phone',
+			'qq' => 'qq',
+			'account' => 'account',
+			'username' => 'username',
+			'status' => 'status',
+			'gid' => 'gid',
+			'upid' => 'upid',
+		];
+		$column = isset($_POST['column']) ? trim($_POST['column']) : '';
+		$value = trim((string)$_POST['value']);
+		if(!isset($columnMap[$column])){
+			exit(json_encode(['total'=>0, 'rows'=>[], 'msg'=>'invalid column']));
+		}
+		$sql .= " AND `{$columnMap[$column]}` = :kw";
+		$params[':kw'] = $value;
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_user WHERE{$sql}");
-	$list = $DB->getAll("SELECT * FROM pre_user WHERE{$sql} order by uid desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_user WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT * FROM pre_user WHERE{$sql} order by uid desc limit $offset,$limit", $params);
 	$list2 = [];
 	foreach($list as $row){
 		if($row['endtime']!=null && strtotime($row['endtime'])<time()){
@@ -53,13 +71,26 @@ break;
 
 case 'recordList':
 	$sql=" 1=1";
-	if(isset($_POST['value']) && !empty($_POST['value'])) {
-		$sql.=" AND `{$_POST['column']}`='{$_POST['value']}'";
+	$params = [];
+	if(isset($_POST['value']) && $_POST['value']!=='') {
+		$columnMap = [
+			'uid' => 'uid',
+			'trade_no' => 'trade_no',
+			'action' => 'action',
+			'type' => 'type',
+		];
+		$column = isset($_POST['column']) ? trim($_POST['column']) : '';
+		$value = trim((string)$_POST['value']);
+		if(!isset($columnMap[$column])){
+			exit(json_encode(['total'=>0, 'rows'=>[], 'msg'=>'invalid column']));
+		}
+		$sql .= " AND `{$columnMap[$column]}` = :kw";
+		$params[':kw'] = $value;
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_record WHERE{$sql}");
-	$list = $DB->getAll("SELECT * FROM pre_record WHERE{$sql} order by id desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_record WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT * FROM pre_record WHERE{$sql} order by id desc limit $offset,$limit", $params);
 
 	exit(json_encode(['total'=>$total, 'rows'=>$list]));
 break;
@@ -199,25 +230,41 @@ break;
 
 case 'logList':
 	$sql=" 1=1";
+	$params = [];
 	if(isset($_POST['value']) && $_POST['value']!=='') {
-		$sql.=" AND `{$_POST['column']}`='{$_POST['value']}'";
+		$columnMap = [
+			'uid' => 'uid',
+			'type' => 'type',
+			'ip' => 'ip',
+			'city' => 'city',
+		];
+		$column = isset($_POST['column']) ? trim($_POST['column']) : '';
+		$value = trim((string)$_POST['value']);
+		if(!isset($columnMap[$column])){
+			exit(json_encode(['total'=>0, 'rows'=>[], 'msg'=>'invalid column']));
+		}
+		$sql .= " AND `{$columnMap[$column]}` = :kw";
+		$params[':kw'] = $value;
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_log WHERE{$sql}");
-	$list = $DB->getAll("SELECT * FROM pre_log WHERE{$sql} order by id desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_log WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT * FROM pre_log WHERE{$sql} order by id desc limit $offset,$limit", $params);
 
 	exit(json_encode(['total'=>$total, 'rows'=>$list]));
 break;
 
 case 'domainList':
 	$sql=" 1=1";
+	$params = [];
 	if(isset($_POST['uid']) && !empty($_POST['uid'])) {
 		$uid = intval($_POST['uid']);
-		$sql.=" AND `uid`='$uid'";
+		$sql.=" AND `uid`=:uid";
+		$params[':uid'] = $uid;
 	}
 	if(isset($_POST['kw']) && !empty($_POST['kw'])) {
-		$sql.=" AND `domain`='{$_POST['kw']}'";
+		$sql.=" AND `domain`=:domain";
+		$params[':domain'] = trim((string)$_POST['kw']);
 	}
 	if(isset($_POST['dstatus']) && $_POST['dstatus']>-1) {
 		$dstatus = intval($_POST['dstatus']);
@@ -225,16 +272,18 @@ case 'domainList':
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_domain WHERE{$sql}");
-	$list = $DB->getAll("SELECT * FROM pre_domain WHERE{$sql} order by id desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_domain WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT * FROM pre_domain WHERE{$sql} order by id desc limit $offset,$limit", $params);
 
 	exit(json_encode(['total'=>$total, 'rows'=>$list]));
 break;
 
 case 'blackList':
 	$sql=" 1=1";
+	$params = [];
 	if(isset($_POST['kw']) && !empty($_POST['kw'])) {
-		$sql.=" AND `content`='{$_POST['kw']}'";
+		$sql.=" AND `content`=:content";
+		$params[':content'] = trim((string)$_POST['kw']);
 	}
 	if(isset($_POST['type']) && $_POST['type']>-1) {
 		$type = intval($_POST['type']);
@@ -242,8 +291,8 @@ case 'blackList':
 	}
 	$offset = intval($_POST['offset']);
 	$limit = intval($_POST['limit']);
-	$total = $DB->getColumn("SELECT count(*) from pre_blacklist WHERE{$sql}");
-	$list = $DB->getAll("SELECT * FROM pre_blacklist WHERE{$sql} order by id desc limit $offset,$limit");
+	$total = $DB->getColumn("SELECT count(*) from pre_blacklist WHERE{$sql}", $params);
+	$list = $DB->getAll("SELECT * FROM pre_blacklist WHERE{$sql} order by id desc limit $offset,$limit", $params);
 
 	exit(json_encode(['total'=>$total, 'rows'=>$list]));
 break;

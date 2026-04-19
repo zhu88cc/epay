@@ -434,10 +434,10 @@ class Payment {
         global $order, $DB, $conf;
 
         $cookiesid = $_COOKIE['mysid'];
-        if(!$cookiesid||!preg_match('/^[0-9a-z]{32}$/i', $cookiesid)){
-            $cookiesid = getSid();
-            setcookie("mysid", $cookiesid, time() + 2592000, '/');
-        }
+		if(!$cookiesid||!preg_match('/^[0-9a-z]{32}$/i', $cookiesid)){
+			$cookiesid = getSid();
+			setCookieSafe("mysid", $cookiesid, time() + 2592000, '/');
+		}
 
         if($conf['wework_paykfid'] > 0){
             $wxkfaccount = $DB->getRow("SELECT * FROM pre_wxkfaccount WHERE id=:id", [':id'=>$conf['wework_paykfid']]);

@@ -1,0 +1,6 @@
+﻿.env
+.idea/
+
+# runtime/cache/logs (optional)
+logs/
+includes/cache/

@@ -1,25 +1,27 @@
-version: "3.8"
-
-services:
+﻿services:
   epay:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: epay
     ports:
-      - "8080:80"
+      - "${APP_PORT:-8080}:80"
     environment:
+      # 外部 MySQL 连接（必填）
       DB_HOST: "${DB_HOST}"
       DB_PORT: "${DB_PORT:-3306}"
       DB_USER: "${DB_USER}"
       DB_PASS: "${DB_PASS}"
       DB_NAME: "${DB_NAME}"
+      # 表前缀（可选，默认 pay）
       DB_PREFIX: "${DB_PREFIX:-pay}"
-      # 可选：站点根URL（不填则按 Host 自动推断）
+      # 可选：站点 URL（不填则按 Host 自动推断）
       # SITE_URL: "${SITE_URL}"
-    volumes:
-      # 需要保留上传/运行时文件时再启用（按需）
-      # - ./install/install.lock:/var/www/html/install/install.lock
-      # - ./cache:/var/www/html/includes/cache
-      # - ./logs:/var/www/html/logs
+
+    # 如需把 install.lock / 缓存 / 日志持久化到宿主机，可按需取消注释
+    # volumes:
+    #   - ./install:/var/www/html/install
+    #   - ./includes/cache:/var/www/html/includes/cache
+    #   - ./logs:/var/www/html/logs
+
     restart: unless-stopped

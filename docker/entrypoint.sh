@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+﻿#!/usr/bin/env sh
 set -eu
 
 cd /var/www/html
@@ -8,9 +8,14 @@ if [ -n "${DB_HOST:-}" ] && [ -n "${DB_USER:-}" ] && [ -n "${DB_NAME:-}" ]; then
   DB_PREFIX="${DB_PREFIX:-pay}"
   DB_PASS="${DB_PASS:-}"
 
+  # Validate DB_PORT (numeric only)
+  case "$DB_PORT" in
+    ''|*[!0-9]*) DB_PORT=3306 ;;
+  esac
+
   php_escape() {
     # Escape for PHP single-quoted strings
-    # - backslash: \\ -> \\\\
+    # - backslash: \ -> \\
     # - single quote: ' -> \'
     printf "%s" "$1" | sed "s/\\\\/\\\\\\\\/g; s/'/\\\\'/g"
   }
